@@ -1,7 +1,5 @@
 package dither
 
-import "math/bits"
-
 //Dither represents a dither map
 type Dither struct {
 	Data []uint
@@ -19,12 +17,15 @@ func New(s uint) *Dither {
 //This assumes that s is a power of two.
 func NewOrdered(s uint) *Dither {
 	d := New(s)
-	bitCount := uint(bits.Len(s*s - 1))
+	bc := uint(0)
+	for v := s; v != 1; v = v >> 1 {
+		bc++
+	}
 
 	for y := uint(0); y < s; y++ {
 		for x := uint(0); x < s; x++ {
 			val := bitInterleave(x^y) | bitInterleave(y)<<1
-			val = bitReverse(val, bitCount)
+			val = bitReverse(val, bc*2)
 			d.Data[y*s+x] = val
 		}
 	}
