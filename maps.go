@@ -24,8 +24,7 @@ func NewOrdered(s uint) *Dither {
 
 	for y := uint(0); y < s; y++ {
 		for x := uint(0); x < s; x++ {
-			val := bitInterleave(x^y) | bitInterleave(y)<<1
-			val = bitReverse(val, bc*2)
+			val := reverseInterleave(x^y, y, bc)
 			d.Data[y*s+x] = val
 		}
 	}

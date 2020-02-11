@@ -4,63 +4,35 @@ import (
 	"testing"
 )
 
-func BenchmarkBitInterleave(b *testing.B) {
+func BenchmarkReverseInterleave8(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		bitInterleave(0xFFFFFFFF)
+		reverseInterleave(0xF0, 0x0F, 8)
 	}
 }
 
-func BenchmarkBitReverse16(b *testing.B) {
+func BenchmarkReverseInterleave16(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		bitReverse(0x00F0, 16)
+		reverseInterleave(0xFF0F, 0xF0FF, 16)
 	}
 }
 
-func BenchmarkBitReverse32(b *testing.B) {
+func BenchmarkReverseInterleave32(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		bitReverse(0x0000F0FF, 32)
+		reverseInterleave(0xFF0FFF0F, 0xF0FFF0FF, 32)
 	}
 }
 
-func BenchmarkBitReverse64(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		bitReverse(0x00000000F0FFF0FF, 64)
-	}
-}
-
-func TestBitInterleave(t *testing.T) {
+func TestReverseInterleave(t *testing.T) {
 	testCases := []struct {
-		N, Expected uint
+		A, B, BC, Expected uint
 	}{
-		{0b1111, 0b01010101},
-		{0b1010, 0b01000100},
-		{0xFFFF, 0x55555555},
-		{0xFFFFFFFF, 0x5555555555555555},
-		{0xFFFFFFFFFFFFFFFF, 0x5555555555555555},
+		{0b10, 0b00, 2, 0b0010},
+		{0b0011, 0b0100, 4, 0b10100100},
 	}
 
 	for i, tc := range testCases {
-		if res := bitInterleave(tc.N); res != tc.Expected {
-			t.Errorf("bitInterleave(%x) = %x; want %x for test case %d", tc.N, res, tc.Expected, i)
-		}
-	}
-}
-
-func TestBitReverse(t *testing.T) {
-	testCases := []struct {
-		N, L, Expected uint
-	}{
-		{0b00001111, 8, 0b11110000},
-		{0b01010000, 8, 0b00001010},
-		{0b0110000, 7, 0b0000110},
-		{0x00F0, 16, 0x0F00},
-		{0x0000FF0F, 32, 0xF0FF0000},
-		{0x00000000FF0FFF0F, 64, 0xF0FFF0FF00000000},
-	}
-
-	for i, tc := range testCases {
-		if res := bitReverse(tc.N, tc.L); res != tc.Expected {
-			t.Errorf("bitReverse(%x, %d) = %x; want %x for test case %d", tc.N, tc.L, res, tc.Expected, i)
+		if res := reverseInterleave(tc.A, tc.B, tc.BC); res != tc.Expected {
+			t.Errorf("reverseInterleave(%b, %b, %d) = %b; want %b for test case %d", tc.A, tc.B, tc.BC, res, tc.Expected, i)
 		}
 	}
 }
