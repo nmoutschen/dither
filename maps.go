@@ -32,6 +32,24 @@ func NewOrdered(s uint) *Dither {
 	return d
 }
 
+//NewRandom returns a dither map with random placement
+func NewRandom(s uint) *Dither {
+	return NewRandomS(s, seed)
+}
+
+//NewRandomS returns a dither map with random placement with a specific seed
+func NewRandomS(s, ns uint) *Dither {
+	d := New(s)
+	for i := uint(0); i < s*s; i++ {
+		d.Data[i] = i
+	}
+	for i := s*s - 1; i > 0; i-- {
+		ns = xorshift(ns)
+		d.Data[i], d.Data[ns%i] = d.Data[ns%i], d.Data[i]
+	}
+	return d
+}
+
 //Map maps a function over the dithering map and returns a slice
 //
 //The mapping function should take an unsigned integer and return an unsigned integer.

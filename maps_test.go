@@ -24,6 +24,24 @@ func BenchmarkNewOrdered256(b *testing.B) {
 	}
 }
 
+func BenchmarkNewRandomS4(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		NewRandomS(4, seed)
+	}
+}
+
+func BenchmarkNewRandomS32(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		NewRandomS(32, seed)
+	}
+}
+
+func BenchmarkNewRandomS256(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		NewRandomS(256, seed)
+	}
+}
+
 func BenchmarkThreshold4(b *testing.B) {
 	d := NewOrdered(4)
 	b.ResetTimer()
@@ -48,6 +66,31 @@ func BenchmarkThreshold256(b *testing.B) {
 	}
 }
 
+func ExampleNew() {
+	d := New(2)
+	fmt.Println(d.Data)
+	//Output:
+	//[0 0 0 0]
+}
+
+func ExampleNewOrdered() {
+	d := NewOrdered(2)
+	fmt.Println(d.Data)
+	fmt.Println(d.Threshold(2))
+	//Output:
+	//[0 2 3 1]
+	//[1 0 0 1]
+}
+
+func ExampleNewRandom() {
+	d := NewRandom(2)
+	fmt.Println(d.Data)
+	fmt.Println(d.Threshold(2))
+	//Output:
+	//[2 3 1 0]
+	//[0 0 1 1]
+}
+
 func TestNewOrdered(t *testing.T) {
 	testCases := []struct {
 		S        uint
@@ -60,6 +103,39 @@ func TestNewOrdered(t *testing.T) {
 	for i, tc := range testCases {
 		if res := NewOrdered(tc.S); !reflect.DeepEqual(res.Data, tc.Expected) {
 			t.Errorf("NewOrdered(%d) = %v; want %v for test case %d", tc.S, res.Data, tc.Expected, i)
+		}
+	}
+}
+
+func TestNewRandom(t *testing.T) {
+	testCases := []struct {
+		S        uint
+		Expected []uint
+	}{
+		{2, []uint{2, 3, 1, 0}},
+		{4, []uint{14, 7, 8, 15, 3, 13, 12, 4, 9, 1, 6, 10, 2, 11, 5, 0}},
+		{8, []uint{2, 42, 25, 62, 58, 8, 55, 53, 23, 36, 16, 46, 5, 34, 54, 50, 1, 57, 31, 29, 63, 18, 27, 15, 4, 26, 7, 28, 3, 22, 52, 47, 48, 24, 41, 19, 0, 61, 32, 44, 13, 10, 51, 37, 60, 43, 59, 45, 6, 14, 39, 21, 11, 35, 20, 56, 9, 40, 12, 33, 38, 49, 17, 30}},
+	}
+
+	for i, tc := range testCases {
+		if res := NewRandom(tc.S); !reflect.DeepEqual(res.Data, tc.Expected) {
+			t.Errorf("NewRandom(%d) = %v; want %v for test case %d", tc.S, res.Data, tc.Expected, i)
+		}
+	}
+}
+
+func TestNewRandomS(t *testing.T) {
+	testCases := []struct {
+		S, NS    uint
+		Expected []uint
+	}{
+		{2, 10, []uint{1, 2, 3, 0}},
+		{4, 1, []uint{5, 13, 0, 15, 7, 12, 10, 14, 2, 1, 4, 6, 11, 8, 3, 9}},
+	}
+
+	for i, tc := range testCases {
+		if res := NewRandomS(tc.S, tc.NS); !reflect.DeepEqual(res.Data, tc.Expected) {
+			t.Errorf("NewRandom(%d, %d) = %v; want %v for test case %d", tc.S, tc.NS, res.Data, tc.Expected, i)
 		}
 	}
 }
