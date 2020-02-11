@@ -1,18 +1,33 @@
 package dither
 
-//Dither represents a dither map
+//Dither is a representation of a dithering threshold map
+//
+//This is used to calculate threshold values, to place a certain number of points distributed evenly (see NewOrdered) or in a random
+//looking fashion (see NewRandom and NewRandomS). Dithering threshold map contains a series of values with each values bound between
+//zero and the size of the map (s*s) and represented once. This means that all numbers will be present only once throughout the map.
+//
+//This can then be used to look at values below or above a certain number. If one needs to have 64 points in a map containing 1032
+//points, one can look at the position of all the points below 64. Depending on the value placement algorithm (e.g. ordered, random),
+//the values below that number could look evenly distributed across the map, or randomly picked.
+//
+////The dither map is internally represented as a slice of size s*s in row-major order. This means that the values correspond to the
+//following (x, y) coordinates: (0, 0), (1, 0), (2, 0) ... (s-1, 0), (1, 1), (2, 1) ... (s-2, s-1), (s-1, s-1).
 type Dither struct {
 	Data []uint
 }
 
-//New creates a new dither map of size s*s
+//New creates a new dithering threshold map of size s*s
+//
+//This initializes an empty map that does not contain any value and therefore should seldomly be used directly.
 func New(s uint) *Dither {
 	return &Dither{
 		Data: make([]uint, s*s),
 	}
 }
 
-//NewOrdered creates a new ordered dither map of size s*s
+//NewOrdered creates a new ordered dithering threshold map of size s*s
+//
+//See https://en.wikipedia.org/wiki/Ordered_dithering
 //
 //This assumes that s is a power of two.
 func NewOrdered(s uint) *Dither {
@@ -32,12 +47,17 @@ func NewOrdered(s uint) *Dither {
 	return d
 }
 
-//NewRandom returns a dither map with random placement
+//NewRandom returns a random dithering threshold map
+//
+//This uses 0x7FFFFFFF (the 9th Mersenne Prime) as seed
 func NewRandom(s uint) *Dither {
 	return NewRandomS(s, seed)
 }
 
-//NewRandomS returns a dither map with random placement with a specific seed
+//NewRandomS returns a random dithering threshold map using a user-provided seed
+//
+//This uses xorshift as a pseudo-random number generator. It is amongst the fastest PRNG available, but does not provide any cryptographic
+//guarantee, which are not needed for this use-case. Using the same seed will yield the same dithering threshold map.
 func NewRandomS(s, ns uint) *Dither {
 	d := New(s)
 	for i := uint(0); i < s*s; i++ {
